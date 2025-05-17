@@ -4,9 +4,17 @@ import threading
 import time
 import json
 import os
+import sys
 import ctypes
 import winsound
 import keyboard
+
+
+def get_resource_path(relative_path):
+    if hasattr(sys, "_MEIPASS"):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.abspath("."), relative_path)
+
 
 CONFIG_FILE = os.path.join(os.getcwd(), "autoclicker_config.json")
 
@@ -81,8 +89,13 @@ class AutoClicker:
             ctypes.windll.user32.mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0)
 
         if self.sound_enabled_getter():
-            audio_path = os.path.join(os.getcwd(), "resources", "click-low.wav")
-            winsound.PlaySound(audio_path, winsound.SND_FILENAME | winsound.SND_ASYNC)
+            audio_path = get_resource_path("resources/click-low.wav")
+            try:
+                winsound.PlaySound(
+                    audio_path, winsound.SND_FILENAME | winsound.SND_ASYNC
+                )
+            except Exception as e:
+                print(f"Erro ao tocar o som: {e}")
 
     def start(self):
         if not self.running:
@@ -120,7 +133,7 @@ class AutoClicker:
 class App:
     def __init__(self, root):
         self.root = root
-        root.title("Bedrock Clicker")
+        root.title("Autoclicker")
         root.resizable(False, False)
 
         self.prefs = ApplicationPreferences()
@@ -167,10 +180,10 @@ class App:
             row=4, column=0, padx=5, pady=5, sticky="e"
         )
         self.sound_on_img = tk.PhotoImage(
-            file=os.path.join(os.getcwd(), "resources", "sound_on.png")
+            file=get_resource_path("resources/sound_on.png")
         ).subsample(20, 20)
         self.sound_off_img = tk.PhotoImage(
-            file=os.path.join(os.getcwd(), "resources", "sound_off.png")
+            file=get_resource_path("resources/sound_off.png")
         ).subsample(20, 20)
         self.sound_btn = tk.Button(
             root,
