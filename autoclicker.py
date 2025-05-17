@@ -291,7 +291,21 @@ class App:
             self.prefs.right_hotkey, self.handle_right_hotkey_release, suppress=False
         )
 
+    def system_modifier_pressed(self):
+        try:
+            super_pressed = keyboard.is_pressed("super")
+        except ValueError:
+            super_pressed = False
+        return (
+            keyboard.is_pressed("alt")
+            or keyboard.is_pressed("ctrl")
+            or keyboard.is_pressed("windows")
+            or super_pressed
+        )
+
     def handle_left_hotkey_press(self, event):
+        if self.system_modifier_pressed():
+            return
         if not self.left_hotkey_pressed:
             self.left_hotkey_pressed = True
             self.left_clicker.toggle()
@@ -300,6 +314,8 @@ class App:
         self.left_hotkey_pressed = False
 
     def handle_right_hotkey_press(self, event):
+        if self.system_modifier_pressed():
+            return
         if not self.right_hotkey_pressed:
             self.right_hotkey_pressed = True
             self.right_clicker.toggle()
